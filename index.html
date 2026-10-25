@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080f1e">
+  <meta name="description" content="미국 회사채 신용스프레드와 나스닥100을 결합한 3년 자동 갱신 시장 위험 대시보드">
+  <title>US Credit Radar | 미국 신용시장 3년 대시보드</title>
+  <link rel="stylesheet" href="./style.css?v=2">
+  <script src="./app.js?v=2" defer></script>
+</head>
+<body>
+  <div class="ambient" aria-hidden="true"></div>
+  <div class="shell">
+    <header class="site-head">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M3 24 L11 17 L16 21 L27 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 7h7v7" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></div>
+        <div><div class="eyebrow">MARKET INTELLIGENCE / US</div><h1>Credit <span>Radar</span></h1></div>
+      </div>
+      <div class="head-actions">
+        <div class="live-indicator"><span class="pulse-dot"></span> FRED 데이터 자동 동기화</div>
+        <button class="refresh" id="refreshBtn" title="서버의 최신 데이터 다시 확인"><svg viewBox="0 0 24 24" fill="none"><path d="M20 7v5h-5M4 17v-5h5M5.5 9A7 7 0 0 1 18 6l2 6M4 12l2 6a7 7 0 0 0 12.5-3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg> 업데이트 확인</button>
+      </div>
+    </header>
+
+    <section class="intro">
+      <div><div class="section-tag">3-YEAR CREDIT RISK MONITOR</div><h2>미국 신용시장 <em>위험 대시보드</em></h2><p>나스닥100 · 투자등급 회사채 OAS · 20/60일 이동평균 · 3년 백분위 신호등</p></div>
+      <div class="asof-chip"><div class="data-status" id="freshness">데이터 확인 중…</div><span id="metaDate">—</span></div>
+    </section>
+
+    <section class="summary-cards" aria-label="주요 지표">
+      <article class="stat primary-stat"><div class="stat-label">회사채 신용스프레드 <span class="stat-sub">OAS</span></div><div class="stat-main"><strong id="oasValue">—</strong><span>bp</span></div><div class="stat-foot" id="oasNote">ICE BofA 미국 투자등급</div></article>
+      <article class="stat"><div class="stat-label">나스닥100 <span class="stat-sub">NDX</span></div><div class="stat-main"><strong id="ndxValue">—</strong></div><div class="stat-foot" id="ndxNote">미국장 종가 기준</div></article>
+      <article class="stat"><div class="stat-label">OAS 20일 / 60일 평균</div><div class="stat-main duo"><strong id="ma20Value">—</strong><span class="divider-inline">/</span><strong id="ma60Value">—</strong><span>bp</span></div><div class="stat-foot" id="maNote">단기·중기 신용 추세</div></article>
+      <article class="stat risk-stat" id="riskStat"><div class="stat-label">3년 백분위 위험 단계</div><div class="risk-stat-body"><div class="risk-orb" id="riskOrb">●</div><div><strong id="riskLabel">—</strong><div class="risk-percent" id="riskPctl">백분위 계산 중</div></div></div><div class="stat-foot" id="riskNote">최근 3년 분포 기준</div></article>
+    </section>
+
+    <main class="dashboard-main">
+      <section class="panel wide-panel" aria-labelledby="mainChartTitle">
+        <div class="panel-head"><div><div class="panel-kicker">01 / PRICE & CREDIT</div><h3 id="mainChartTitle">나스닥100 × 신용스프레드</h3><p>같은 기간의 주가와 채권시장 위험 프리미엄을 두 축으로 비교합니다.</p></div><div class="period-switch" role="group" aria-label="차트 조회 기간"><button data-period="6m">6개월</button><button data-period="1y">1년</button><button data-period="3y" class="active">3년</button></div></div>
+        <div class="legend"><span><i class="legend-line ndx-line"></i> 나스닥100 <small>좌측 축</small></span><span><i class="legend-line oas-line"></i> 신용스프레드 <small>우측 축, bp</small></span></div>
+        <div class="plot-wrap"><svg class="plot" id="priceChart" role="img" aria-label="나스닥100 및 회사채 OAS의 3년 추이"></svg><div class="chart-tooltip" id="priceTooltip" hidden></div></div>
+        <div class="plot-footer"><span>↑ 신용스프레드 확대 = 위험 프리미엄 상승</span><span>※ 주가 하락을 항상 선행하는 것은 아닙니다</span></div>
+      </section>
+
+      <section class="panel wide-panel" aria-labelledby="maChartTitle">
+        <div class="panel-head"><div><div class="panel-kicker">02 / TREND & THRESHOLD</div><h3 id="maChartTitle">신용스프레드 · 20일 · 60일</h3><p>3년 분포에서 계산한 위험 경계선과 이동평균선을 함께 표시합니다.</p></div><div class="trend-flag" id="trendFlag">추세 계산 중</div></div>
+        <div class="legend legend-wrap"><span><i class="legend-line oas-line"></i> 일별 OAS</span><span><i class="legend-line ma20-line"></i> 20일 이동평균</span><span><i class="legend-line ma60-line"></i> 60일 이동평균</span><span><i class="legend-dash"></i> 3년 75·90백분위</span></div>
+        <div class="plot-wrap"><svg class="plot" id="maChart" role="img" aria-label="회사채 OAS 및 이동평균과 3년 위험 경계선"></svg><div class="chart-tooltip" id="maTooltip" hidden></div></div>
+        <div class="plot-footer"><span id="maChartInfo">이동평균은 유효 관측치 20개·60개의 단순평균</span><span>단위: basis point (bp)</span></div>
+      </section>
+
+      <section class="panel risk-panel" aria-labelledby="riskTitle">
+        <div class="panel-head"><div><div class="panel-kicker">03 / RISK REGIME</div><h3 id="riskTitle">3년 위험 신호등</h3><p>최근 3년 관측치의 상대적 위치</p></div></div>
+        <div class="zone-gauge" id="zoneGauge"><div class="gauge-marker" id="gaugeMarker" style="left:50%"><span>현재</span></div><div class="gauge-track"><div class="z z-safe"></div><div class="z z-watch"></div><div class="z z-alert"></div><div class="z z-danger"></div></div><div class="gauge-labels"><span>0</span><span>50</span><span>75</span><span>90</span><span>100%</span></div></div>
+        <div class="risk-tiers" id="riskTiers"></div>
+        <p class="mini-note">백분위는 과거 3년 OAS 분포상의 위치입니다. 절대적인 경기침체 확률을 뜻하지 않습니다.</p>
+      </section>
+
+      <section class="panel signal-panel" aria-labelledby="signalTitle">
+        <div class="panel-head"><div><div class="panel-kicker">04 / INVESTMENT SIGNAL</div><h3 id="signalTitle">시장 해석</h3><p>채권시장과 주식시장 신호를 함께 평가</p></div></div>
+        <div class="signal-status" id="signalStatus">최신 데이터를 확인하고 있습니다.</div>
+        <div class="signal-lines" id="signalLines"></div>
+        <div class="insight-box"><div class="insight-icon">↗</div><div><strong>분석 원칙</strong><p>OAS 상승은 경계 신호지만 단독 매도 신호는 아닙니다. 나스닥 추세, 실질금리, 하이일드 OAS까지 함께 확인해야 합니다.</p></div></div>
+      </section>
+    </main>
+
+    <footer><div><strong>Credit Radar</strong> · 원자료 <a target="_blank" rel="noopener noreferrer" href="https://fred.stlouisfed.org/series/NASDAQ100">NASDAQ100</a> / <a target="_blank" rel="noopener noreferrer" href="https://fred.stlouisfed.org/series/BAMLC0A0CM">BAMLC0A0CM</a></div><div>일별 공개 데이터 기반 · 실시간 틱 시세가 아닙니다 · 투자 판단의 참고 자료</div><div id="updatedAt">데이터 동기화 확인 중…</div></footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,55 @@
+name: Update US Credit Dashboard
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    # 09:23, 15:23, 21:23 Korea Standard Time (UTC+9).
+    # GitHub scheduled runs may be delayed; FRED observes US holidays.
+    - cron: '23 0,6,12 * * *'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  update-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch FRED data and compute signal
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: |
+          # When provider access fails, keep checked-in data/latest.json.
+          # Freshness dates on the website clearly disclose stale data.
+          python scripts/build_data.py || echo "::warning::FRED retrieval failed; keeping prior published snapshot."
+          test -s data/latest.json
+      - name: Prepare public website
+        run: |
+          mkdir -p site/data
+          cp index.html style.css app.js .nojekyll site/
+          cp data/latest.json site/data/latest.json
+      - name: Set up Pages
+        uses: actions/configure-pages@v5
+      - name: Package static website
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - name: Publish website
+        id: deploy
+        uses: actions/deploy-pages@v4
